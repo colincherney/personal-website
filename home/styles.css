@@ -1,0 +1,42 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  background-color: #000;
+}
+
+#globe-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#info {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: white;
+  z-index: 100;
+  display: block;
+}
+
+#info h1 {
+  font-size: 4rem;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  margin: 0;
+  padding: 20px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  font-family: "Grey Qo", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+
+#info h1:hover {
+  transform: scale(1.1);
+  text-shadow: 0 0 20px rgba(255, 255, 255, 1);
+}
