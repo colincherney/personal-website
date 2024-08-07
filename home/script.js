@@ -87,6 +87,72 @@ starsGeometry.setAttribute(
 const starField = new THREE.Points(starsGeometry, starsMaterial);
 scene.add(starField);
 
+// Function to create satellites
+function createSatellite() {
+  const geometry = new THREE.SphereGeometry(0.5, 32, 32);
+  const material = new THREE.MeshBasicMaterial({ color: 0xcccccc });
+  const satellite = new THREE.Mesh(geometry, material);
+
+  // Set random position
+  satellite.position.set(
+    (Math.random() - 0.5) * 400,
+    (Math.random() - 0.5) * 400,
+    (Math.random() - 0.5) * 400
+  );
+
+  // Set random velocity
+  satellite.velocity = new THREE.Vector3(
+    (Math.random() - 0.5) * 2,
+    (Math.random() - 0.5) * 2,
+    (Math.random() - 0.5) * 2
+  );
+
+  scene.add(satellite);
+  return satellite;
+}
+
+// Function to create shooting stars
+function createShootingStar() {
+  const geometry = new THREE.BufferGeometry();
+  const material = new THREE.LineBasicMaterial({ color: 0xffffff });
+
+  const points = [];
+  points.push(new THREE.Vector3(0, 0, 0));
+  points.push(new THREE.Vector3(0, 0, -20));
+  geometry.setFromPoints(points);
+
+  const shootingStar = new THREE.Line(geometry, material);
+
+  // Set random position
+  shootingStar.position.set(
+    (Math.random() - 0.5) * 2000,
+    (Math.random() - 0.5) * 2000,
+    (Math.random() - 0.5) * 2000
+  );
+
+  // Set random velocity
+  shootingStar.velocity = new THREE.Vector3(
+    (Math.random() - 0.5) * 10,
+    (Math.random() - 0.5) * 10,
+    (Math.random() - 0.5) * 10
+  );
+
+  scene.add(shootingStar);
+  return shootingStar;
+}
+
+// Create arrays for satellites and shooting stars
+const satellites = [];
+const shootingStars = [];
+
+// Create initial satellites and shooting stars
+for (let i = 0; i < 10; i++) {
+  satellites.push(createSatellite());
+}
+for (let i = 0; i < 5; i++) {
+  shootingStars.push(createShootingStar());
+}
+
 // Rotation speed (in radians per second)
 const rotationSpeed = 0.05;
 
@@ -100,11 +166,42 @@ function animate() {
   // Rotate the star field slowly
   starField.rotation.y += rotationSpeed * 0.01;
 
+  // Update satellites
+  satellites.forEach((satellite, index) => {
+    satellite.position.add(satellite.velocity);
+    if (
+      satellite.position.length() > 500 ||
+      satellite.position.length() < 150
+    ) {
+      scene.remove(satellite);
+      satellites[index] = createSatellite();
+    }
+  });
+
+  // Update shooting stars
+  shootingStars.forEach((star, index) => {
+    star.position.add(star.velocity);
+    if (star.position.length() > 1500) {
+      scene.remove(star);
+      shootingStars[index] = createShootingStar();
+    }
+  });
+
   controls.update();
   renderer.render(scene, camera);
 }
 
+// Function to occasionally add new shooting stars
+function addRandomShootingStar() {
+  if (Math.random() < 0.02) {
+    // 2% chance each frame
+    shootingStars.push(createShootingStar());
+  }
+  requestAnimationFrame(addRandomShootingStar);
+}
+
 animate();
+addRandomShootingStar();
 
 const smokeContainer = document.getElementById("smoke-container");
 const customCursor = document.getElementById("custom-cursor");
