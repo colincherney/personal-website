@@ -53,12 +53,37 @@ body {
 
 #custom-cursor {
   position: fixed;
-  width: 10px;
-  height: 10px;
-  background-color: white;
-  border-radius: 50%;
   pointer-events: none;
   z-index: 10000;
+}
+
+.orb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(0, 255, 255, 1) 0%,
+    rgba(0, 128, 255, 0.8) 50%,
+    rgba(0, 0, 255, 0) 100%
+  );
+  box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+  transform: translate(-50%, -50%);
+}
+
+.trail {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(0, 255, 255, 0.8) 0%,
+    rgba(0, 128, 255, 0.5) 50%,
+    rgba(0, 0, 255, 0) 100%
+  );
+  transform: translate(-50%, -50%);
+  opacity: 0;
 }
 
 .smoke-particle {
