@@ -1,5 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 
 // Create scene
 const scene = new THREE.Scene();
@@ -32,6 +34,49 @@ const texture = textureLoader.load(
 const material = new THREE.MeshPhongMaterial({ map: texture });
 const globe = new THREE.Mesh(geometry, material);
 scene.add(globe);
+
+// Add Arizona pin
+const arizonaLatitude = 34.0489;
+const arizonaLongitude = -111.0937;
+
+// Create a larger clickable area for the pin
+const pinGeometry = new THREE.SphereGeometry(5, 32, 32);
+const pinMaterial = new THREE.MeshBasicMaterial({
+  color: 0xff0000,
+  transparent: true,
+  opacity: 0.5,
+});
+const pin = new THREE.Mesh(pinGeometry, pinMaterial);
+
+// Calculate the position on the globe
+const phi = (90 - arizonaLatitude) * (Math.PI / 180);
+const theta = (arizonaLongitude + 180) * (Math.PI / 180);
+const x = -(100 * Math.sin(phi) * Math.cos(theta));
+const y = 100 * Math.cos(phi);
+const z = 100 * Math.sin(phi) * Math.sin(theta);
+
+pin.position.set(x, y, z);
+globe.add(pin);
+
+// Add "About Me" text
+const loader = new FontLoader();
+loader.load(
+  "https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
+  function (font) {
+    const textGeometry = new TextGeometry("About Me", {
+      font: font,
+      size: 3,
+      height: 0.2,
+    });
+    const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+    textMesh.position.set(x, y + 8, z);
+    textMesh.lookAt(0, 0, 0);
+    textMesh.rotation.y = Math.PI; // Rotate the text 180 degrees
+    textMesh.name = "aboutMeText"; // Add this line to set the name
+    globe.add(textMesh);
+  }
+);
 
 // Add ambient light
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -93,14 +138,12 @@ function createSatellite() {
   const material = new THREE.MeshBasicMaterial({ color: 0xcccccc });
   const satellite = new THREE.Mesh(geometry, material);
 
-  // Set random position
   satellite.position.set(
     (Math.random() - 0.5) * 400,
     (Math.random() - 0.5) * 400,
     (Math.random() - 0.5) * 400
   );
 
-  // Set random velocity
   satellite.velocity = new THREE.Vector3(
     (Math.random() - 0.5) * 2,
     (Math.random() - 0.5) * 2,
@@ -123,14 +166,12 @@ function createShootingStar() {
 
   const shootingStar = new THREE.Line(geometry, material);
 
-  // Set random position
   shootingStar.position.set(
     (Math.random() - 0.5) * 2000,
     (Math.random() - 0.5) * 2000,
     (Math.random() - 0.5) * 2000
   );
 
-  // Set random velocity
   shootingStar.velocity = new THREE.Vector3(
     (Math.random() - 0.5) * 10,
     (Math.random() - 0.5) * 10,
@@ -156,17 +197,32 @@ for (let i = 0; i < 5; i++) {
 // Rotation speed (in radians per second)
 const rotationSpeed = 0.05;
 
+// Add click event listener
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+renderer.domElement.addEventListener("click", onMouseClick, false);
+
+function onMouseClick(event) {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+
+  const intersects = raycaster.intersectObject(pin);
+
+  if (intersects.length > 0) {
+    window.location.href = "../about/about.html";
+  }
+}
+
 // Animation loop
 function animate() {
   requestAnimationFrame(animate);
 
-  // Apply rotation to the globe
   globe.rotation.y += rotationSpeed * 0.03;
-
-  // Rotate the star field slowly
   starField.rotation.y += rotationSpeed * 0.01;
 
-  // Update satellites
   satellites.forEach((satellite, index) => {
     satellite.position.add(satellite.velocity);
     if (
@@ -178,7 +234,6 @@ function animate() {
     }
   });
 
-  // Update shooting stars
   shootingStars.forEach((star, index) => {
     star.position.add(star.velocity);
     if (star.position.length() > 1500) {
@@ -194,7 +249,6 @@ function animate() {
 // Function to occasionally add new shooting stars
 function addRandomShootingStar() {
   if (Math.random() < 0.02) {
-    // 2% chance each frame
     shootingStars.push(createShootingStar());
   }
   requestAnimationFrame(addRandomShootingStar);
@@ -224,19 +278,15 @@ function createSmokeParticle(x, y, dx, dy) {
 
   smokeContainer.appendChild(particle);
 
-  // Force reflow
   particle.offsetWidth;
 
-  // Calculate spread direction based on cursor movement
-  const spreadX = dy * (Math.random() - 0.5) * 2; // Perpendicular to movement
-  const spreadY = -dx * (Math.random() - 0.5) * 2; // Perpendicular to movement
+  const spreadX = dy * (Math.random() - 0.5) * 2;
+  const spreadY = -dx * (Math.random() - 0.5) * 2;
 
-  // Apply transform for spreading effect
   particle.style.transform = `translate(${spreadX}px, ${spreadY}px)`;
 
   setTimeout(() => {
     particle.style.opacity = "0";
-    // Increase the spread over time
     particle.style.transform = `translate(${spreadX * 2}px, ${spreadY * 2}px)`;
   }, 50);
 
@@ -259,7 +309,6 @@ document.addEventListener("mousemove", (e) => {
 
   if (currentTime - lastParticleTime > 10 && speed > 1) {
     for (let i = 0; i < 2; i++) {
-      // Create 2 particles for a thicker trail
       createSmokeParticle(x, y, dx, dy);
     }
     lastParticleTime = currentTime;
