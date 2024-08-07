@@ -59,6 +59,34 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+// Create stars
+const starsGeometry = new THREE.BufferGeometry();
+const starsMaterial = new THREE.PointsMaterial({
+  color: 0xffffff,
+  size: 0.5,
+  sizeAttenuation: true,
+});
+
+const starsVertices = [];
+const radius = 1000; // Radius of star sphere
+const starsCount = 20000; // Increased number of stars
+
+for (let i = 0; i < starsCount; i++) {
+  const theta = 2 * Math.PI * Math.random();
+  const phi = Math.acos(2 * Math.random() - 1);
+  const x = radius * Math.sin(phi) * Math.cos(theta);
+  const y = radius * Math.sin(phi) * Math.sin(theta);
+  const z = radius * Math.cos(phi);
+  starsVertices.push(x, y, z);
+}
+
+starsGeometry.setAttribute(
+  "position",
+  new THREE.Float32BufferAttribute(starsVertices, 3)
+);
+const starField = new THREE.Points(starsGeometry, starsMaterial);
+scene.add(starField);
+
 // Rotation speed (in radians per second)
 const rotationSpeed = 0.05;
 
@@ -66,10 +94,13 @@ const rotationSpeed = 0.05;
 function animate() {
   requestAnimationFrame(animate);
 
-  // Apply rotation
-  globe.rotation.y += rotationSpeed * 0.03; // Assuming 60fps, adjust if needed
+  // Apply rotation to the globe
+  globe.rotation.y += rotationSpeed * 0.03;
 
-  controls.update(); // required if controls.enableDamping = true
+  // Rotate the star field slowly
+  starField.rotation.y += rotationSpeed * 0.01;
+
+  controls.update();
   renderer.render(scene, camera);
 }
 
