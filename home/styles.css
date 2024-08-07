@@ -3,6 +3,7 @@ body {
   overflow: hidden;
   font-family: Arial, sans-serif;
   background-color: #000;
+  cursor: none; /* Hide the default cursor */
 }
 
 #globe-container {
@@ -39,4 +40,36 @@ body {
 #info h1:hover {
   transform: scale(1.1);
   text-shadow: 0 0 20px rgba(255, 255, 255, 1);
+}
+
+#smoke-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+#custom-cursor {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  background-color: white;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+}
+
+.smoke-particle {
+  position: absolute;
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(200, 200, 200, 0.3) 40%,
+    rgba(150, 150, 150, 0) 70%
+  );
+  filter: url(#smoke-filter);
+  opacity: 0;
+  transition: opacity 2s ease-out;
 }

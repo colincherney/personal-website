@@ -106,4 +106,76 @@ function animate() {
 
 animate();
 
-console.log("Globe script loaded");
+const smokeContainer = document.getElementById("smoke-container");
+const customCursor = document.getElementById("custom-cursor");
+
+let prevX = 0;
+let prevY = 0;
+let lastParticleTime = 0;
+
+function createSmokeParticle(x, y, dx, dy) {
+  const particle = document.createElement("div");
+  particle.className = "smoke-particle";
+
+  const size = 20 + Math.random() * 20;
+
+  particle.style.width = `${size}px`;
+  particle.style.height = `${size}px`;
+  particle.style.left = `${x - size / 2}px`;
+  particle.style.top = `${y - size / 2}px`;
+  particle.style.opacity = 0.3 + Math.random() * 0.2;
+
+  smokeContainer.appendChild(particle);
+
+  // Force reflow
+  particle.offsetWidth;
+
+  // Calculate spread direction based on cursor movement
+  const spreadX = dy * (Math.random() - 0.5) * 2; // Perpendicular to movement
+  const spreadY = -dx * (Math.random() - 0.5) * 2; // Perpendicular to movement
+
+  // Apply transform for spreading effect
+  particle.style.transform = `translate(${spreadX}px, ${spreadY}px)`;
+
+  setTimeout(() => {
+    particle.style.opacity = "0";
+    // Increase the spread over time
+    particle.style.transform = `translate(${spreadX * 2}px, ${spreadY * 2}px)`;
+  }, 50);
+
+  setTimeout(() => {
+    smokeContainer.removeChild(particle);
+  }, 1550);
+}
+
+document.addEventListener("mousemove", (e) => {
+  const x = e.clientX;
+  const y = e.clientY;
+  const currentTime = Date.now();
+
+  customCursor.style.left = `${x - 5}px`;
+  customCursor.style.top = `${y - 5}px`;
+
+  const dx = x - prevX;
+  const dy = y - prevY;
+  const speed = Math.sqrt(dx * dx + dy * dy);
+
+  if (currentTime - lastParticleTime > 10 && speed > 1) {
+    for (let i = 0; i < 2; i++) {
+      // Create 2 particles for a thicker trail
+      createSmokeParticle(x, y, dx, dy);
+    }
+    lastParticleTime = currentTime;
+  }
+
+  prevX = x;
+  prevY = y;
+});
+
+document.addEventListener("mouseleave", () => {
+  customCursor.style.display = "none";
+});
+
+document.addEventListener("mouseenter", () => {
+  customCursor.style.display = "block";
+});
